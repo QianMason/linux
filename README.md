@@ -11,7 +11,7 @@ Did it myself.
 3. Downloaded Ubuntu 20.04 LTS ISO from Ubuntu website
 4. Created VM using VMWare and Ubuntu per instructions
 5. Installed gcc, make on machine
-6. Finished .c file to return full CPU capabilities and revision number
+6. Finished .c file to return full CPU capabilities and revision number (referenced AMD Programmer Reference Guide Vol. 3 Appendix)
 7. Compiled and tested module on VM
 8. Fork and clone linux repo from torvalds/linux.git (only latest commit to reduce size)
 9. Add assignment folder (assignment1) to repo and add README.md
