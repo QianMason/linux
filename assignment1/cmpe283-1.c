@@ -48,6 +48,18 @@ struct capability_info svm0a_eax[1] =
 	{0, "SVM Revision Number"}
 };
 
+static inline void
+__cpuid(unsigned int *eax, unsigned int *ebx, unsigned int *ecx,
+    unsigned int *edx)
+{
+      asm volatile("cpuid"
+            : "=a" (*eax),
+              "=b" (*ebx),
+              "=c" (*ecx),
+              "=d" (*edx)
+            : "0" (*eax), "1" (*ebx), "2" (*ecx), "3" (*edx));
+}
+
 /*
  * report_capability
  *
@@ -147,6 +159,12 @@ init_module(void)
 
 	detect_svm_features();
 
+	unsigned int eax, ebx, ecx, edx;
+
+	eax = 0x4FFFFFFF;
+	__cpuid(&eax, &ebx, &ecx, &edx);
+	ebx = ebx & lower = some_var & 0xffffffff;
+	printk("CPUID(0x4FFFFFFF), exits=%x", ebx);	
 	/* 
 	 * A non 0 return means init_module failed; module can't be loaded. 
 	 */
@@ -163,3 +181,4 @@ cleanup_module(void)
 {
 	printk(KERN_INFO "CMPE 283 Assignment 1 Module Exits\n");
 }
+
