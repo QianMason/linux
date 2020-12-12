@@ -16,3 +16,17 @@ Did it myself.
 8. Fork and clone linux repo from torvalds/linux.git (only latest commit to reduce size)
 9. Add assignment folder (assignment1) to repo and add README.md
 10. Finish README.md and push to repo
+
+# Assignment 2:
+
+### Q1: 
+
+Did it myself, didn't finish.
+
+### Q2:
+1. Downloaded Linux Kernel from Github onto local machine.
+2. Installed dependencies required for making/compiling linux kernel.
+3. Compiled Linux Kernel
+4. Attempted to code solution to problem.
+5. Attempted to set up a VM via KVM/QEMU/virsh. 
+6. Sometimes things don't always work out. 
