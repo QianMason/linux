@@ -14,6 +14,8 @@
 #include <linux/vmalloc.h>
 #include <linux/uaccess.h>
 #include <linux/sched/stat.h>
+#include <linux/atomic.h>
+#include <linux/module.h>
 
 #include <asm/processor.h>
 #include <asm/user.h>
@@ -23,6 +25,12 @@
 #include "mmu.h"
 #include "trace.h"
 #include "pmu.h"
+
+
+atomic_t exit_count = ATOMIC_INIT(0);
+atomic64_t cycle_count = ATOMIC_INIT(0);
+EXPORT_SYMBOL(exit_count);
+EXPORT_SYMBOL(cycle_count);
 
 /*
  * Unlike "struct cpuinfo_x86.x86_capability", kvm_cpu_caps doesn't need to be
@@ -1081,6 +1089,16 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 
 	eax = kvm_rax_read(vcpu);
 	ecx = kvm_rcx_read(vcpu);
+
+	//modification goes here
+	if (eax == 0x4fffffff){
+		printk("custom function trigger");
+		eax = (u32) atomic_read(&exit_count);
+		ebx = (u32) (atomic64_read(&cycle_count)>>32) & 0xffffffff;
+		ecx = (u32) atomic64_read(&cycle_count) & 0xffffffff;
+		printk("exit_count: %x, cycle_count: %llx", atomic_read(&exit_count), atomic64_read(&cycle_count));
+	}
+
 	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	kvm_rax_write(vcpu, eax);
 	kvm_rbx_write(vcpu, ebx);

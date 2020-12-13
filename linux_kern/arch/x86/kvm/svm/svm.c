@@ -75,6 +75,9 @@ MODULE_DEVICE_TABLE(x86cpu, svm_cpu_id);
 #define TSC_RATIO_MIN		0x0000000000000001ULL
 #define TSC_RATIO_MAX		0x000000ffffffffffULL
 
+extern atomic_t exit_count;
+extern atomic64_t cycle_count;
+
 static bool erratum_383_found __read_mostly;
 
 u32 msrpm_offsets[MSRPM_OFFSETS] __read_mostly;
@@ -2933,9 +2936,14 @@ static void svm_get_exit_info(struct kvm_vcpu *vcpu, u64 *info1, u64 *info2)
 
 static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 {
+	//start measuring cycles spent in this
+	u64 start_time = rdtsc();
+	u64 finish_time;
 	struct vcpu_svm *svm = to_svm(vcpu);
 	struct kvm_run *kvm_run = vcpu->run;
 	u32 exit_code = svm->vmcb->control.exit_code;
+
+	atomic_add(1,&exit_count);
 
 	trace_kvm_exit(exit_code, vcpu, KVM_ISA_SVM);
 
@@ -2959,8 +2967,13 @@ static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		if (vmexit == NESTED_EXIT_CONTINUE)
 			vmexit = nested_svm_exit_handled(svm);
 
-		if (vmexit == NESTED_EXIT_DONE)
+		//modification
+		if (vmexit == NESTED_EXIT_DONE) {
+			finish_time = rdtsc();
+			atomic64_add(finish_time - start_time,&cycle_count);
 			return 1;
+		}
+			
 	}
 
 	if (svm->vmcb->control.exit_code == SVM_EXIT_ERR) {
@@ -2969,6 +2982,8 @@ static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 			= svm->vmcb->control.exit_code;
 		kvm_run->fail_entry.cpu = vcpu->arch.last_vmentry_cpu;
 		dump_vmcb(vcpu);
+			finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
 		return 0;
 	}
 
@@ -2981,8 +2996,12 @@ static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		       __func__, svm->vmcb->control.exit_int_info,
 		       exit_code);
 
-	if (exit_fastpath != EXIT_FASTPATH_NONE)
+	if (exit_fastpath != EXIT_FASTPATH_NONE) {
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
 		return 1;
+	}
+		
 
 	if (exit_code >= ARRAY_SIZE(svm_exit_handlers)
 	    || !svm_exit_handlers[exit_code]) {
@@ -2994,21 +3013,42 @@ static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		vcpu->run->internal.ndata = 2;
 		vcpu->run->internal.data[0] = exit_code;
 		vcpu->run->internal.data[1] = vcpu->arch.last_vmentry_cpu;
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
 		return 0;
 	}
 
 #ifdef CONFIG_RETPOLINE
-	if (exit_code == SVM_EXIT_MSR)
-		return msr_interception(svm);
-	else if (exit_code == SVM_EXIT_VINTR)
+	if (exit_code == SVM_EXIT_MSR) {
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
+		return msr_interception(svm);	
+	}
+		
+	else if (exit_code == SVM_EXIT_VINTR) {
 		return interrupt_window_interception(svm);
-	else if (exit_code == SVM_EXIT_INTR)
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
+	}
+		
+	else if (exit_code == SVM_EXIT_INTR) {
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
 		return intr_interception(svm);
-	else if (exit_code == SVM_EXIT_HLT)
+	}
+	else if (exit_code == SVM_EXIT_HLT) {
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
 		return halt_interception(svm);
-	else if (exit_code == SVM_EXIT_NPF)
+	}
+	else if (exit_code == SVM_EXIT_NPF) {
+		finish_time = rdtsc();
+		atomic64_add(finish_time - start_time,&cycle_count);
 		return npf_interception(svm);
+	}
 #endif
+	finish_time = rdtsc();
+	atomic64_add(finish_time - start_time,&cycle_count);
 	return svm_exit_handlers[exit_code](svm);
 }
 
