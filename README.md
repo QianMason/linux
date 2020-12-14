@@ -10,6 +10,12 @@ With EPT:
 Without EPT:
 ![output-noept]a4noept.png
 
+### Q3:
+The count was what I expected. EPT is intel's brand of nested paging, which uses less exits. 
+
+### Q4:
+As we learned in class, shadow paging utilizes many more exits than nested paging does. In this case I saw almost 2-3x more exits in the non ept version (shadow paging) than the ept version (nested paging). 
+
 # Assignment 3:
 
 ### Q1:
