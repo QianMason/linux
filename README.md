@@ -5,10 +5,10 @@ All parts done by me alone.
 
 ### Q2:
 With EPT:
-![output-ept]a4ept.png
+![output-ept](a4ept.png)
 
 Without EPT:
-![output-noept]a4noept.png
+![output-noept](a4noept.png)
 
 ### Q3:
 The count was what I expected. EPT is intel's brand of nested paging, which uses less exits. 
