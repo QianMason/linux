@@ -4,11 +4,11 @@
 All parts done by me alone.
 
 ### Q2:
-With EPT:
+With EPT:  
 ![output-ept](a4ept.png)
 
 
-Without EPT:
+Without EPT:  
 ![output-noept](a4noept.png)
 
 ### Q3:
