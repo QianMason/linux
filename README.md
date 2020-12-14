@@ -30,3 +30,28 @@ Did it myself, didn't finish.
 4. Attempted to code solution to problem.
 5. Attempted to set up a VM via KVM/QEMU/virsh. 
 6. Sometimes things don't always work out. 
+
+# Assignment 3:
+
+### Q1:
+All parts done by me alone. 
+
+### Q2:
+1. Finished up files from assignment 2 to use in assignment 3.
+2. Pull up AMD developer manual to get intercept codes 
+3. Edited cpuid.c and svm.c files in the kvm folders to generate assignment output
+4. Recompiled modules with 'make modules M=arch/x86/kvm/
+5. Manually moved module files into my kernel's module location using the following commands:
+
+cp arch/x86/kvm/kvm.ko /lib/modules/5.9.0/kernel/arch/x86/kvm/kvm.ko
+cp arch/x86/kvm/kvm-amd.ko /lib/modules/5.9.0/kernel/arch/x86/kvm/kvm-amd.ko
+
+For some reason, removing and inserting new modules using rmmod and insmod did not have the intended affect. The kernel was continuing to utilize the old module for some reason. 
+6. Test output with my test file.
+7. Check dmesg in outer VM to get exit outputs. 
+
+### Q3: 
+The number of exits does seem to increase at a steady rate. Certain exit types do occur much more frequently.
+
+### Q4:
+Of the exit types defined in the AMD Manual, it seems that VMEXIT_NPF (hex code: 400, index 59 in my array) gets called most frequently. Other exits called frequently were VMEXIT_IOIO (hex code: 7b, index 32) and VMEXIT_MSR (hex code: 7c, index 33). Besides the any exits that have 0 count, exit type "VMEXIT_CR[0–15]_READ" (hex code: 0-F) and "VMEXIT_DR[0–15]_WRITE" (hex code: 30-3F) were called very infrequently (< 20 times).
